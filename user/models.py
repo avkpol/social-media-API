@@ -45,7 +45,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+        super().__init__(*args, **kwargs)
         self.is_admin = None
 
     def __str__(self):
