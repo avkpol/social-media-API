@@ -5,11 +5,9 @@ from .models import Post, Follower
 
 
 class PostSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
     class Meta:
         model = Post
-        fields = "__all__"
+        fields = ['id', 'user', 'content', 'media', 'created_at', 'updated_at']
 
 
 class FollowerSerializer(serializers.ModelSerializer):
