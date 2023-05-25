@@ -57,10 +57,10 @@ and following best practices for API design and documentation.
 ### API to be created(project):
 
 ```
-POST /api/register
-POST /api/login
-POST /api/logout
-POST /api/profile
+POST /api/user/register
+POST /api/user/login
+POST /api/user/logout
+POST /api/user/profile
 GET /api/profile/{username}
 GET /api/users?q={query}
 POST /api/follow/{username}
