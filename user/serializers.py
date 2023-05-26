@@ -1,18 +1,23 @@
+from django.contrib.auth import get_user_model
+
 from rest_framework import serializers
-from .models import User, Profile
+
+from user.models import Profile
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'email', 'password']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    profile_picture = serializers.ImageField(required=False)
-
     class Meta:
         model = Profile
-        fields = ["id", "profile_picture", "bio", "created_at", "updated_at"]
+        fields = ['profile_picture', 'bio']
 
-
-class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)
-
-    class Meta:
-        model = User
-        fields = ["id", "email", "profile"]
+    def create(self, validated_data):
+        user = self.context['request'].user
+        profile = Profile.objects.create(user=user, **validated_data)
+        return profile
