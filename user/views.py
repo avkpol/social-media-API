@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
 
-from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.contrib.auth import get_user_model
@@ -81,7 +81,7 @@ class UserProfileListAPIView(APIView):
 
 class UserSearchView(APIView):
     def get(self, request):
-        query = request.query_params.get('query')
+        query = request.query_params.get('query', )
         users = []
         if query:
             users = User.objects.filter(username__icontains=query)
@@ -119,7 +119,7 @@ class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        refresh_token = request.data.get("refresh")
+        refresh_token = request.data.get("refresh", )
 
         # Blacklist the refresh token to invalidate it
         try:
@@ -130,20 +130,26 @@ class UserLogoutView(APIView):
             return Response({"detail": "Invalid token"}, status=401)
 
 class UserFollowView(APIView):
-    def post(self, request, user_id):
+    serializer_class = UserProfileSerializer
+
+    def post(self, request, user_pk):
         user = request.user
         try:
-            target_user = User.objects.get(id=user_id)
+            target_user = get_object_or_404(User, id=user_pk)
             user.follow(target_user)
-            return Response({'detail': 'User followed successfully.'})
+            serializer = FollowingSerializer(target_user)
+            return Response(serializer.data)
         except User.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=404)
 
+
 class UserUnfollowView(APIView):
-    def post(self, request, user_id):
+    serializer_class = UserProfileSerializer
+
+    def post(self, request, user_pk):
         user = request.user
         try:
-            target_user = User.objects.get(id=user_id)
+            target_user = User.objects.get()
             user.unfollow(target_user)
             return Response({'detail': 'User unfollowed successfully.'})
         except User.DoesNotExist:
@@ -162,4 +168,18 @@ class UserFollowerListView(APIView):
         followers = user.get_followers()
         serializer = FollowerSerializer(followers, many=True)
         return Response(serializer.data)
+
+class UserProfileView(APIView):
+    serializer_class = UserProfileSerializer
+    lookup_field = 'user__username'
+
+    def get(self, request, username):
+        profile = get_object_or_404(UserProfile, user__username=username)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+
+class UserProfileDetailView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    lookup_field = 'username'
 

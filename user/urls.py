@@ -14,7 +14,7 @@ from user.views import (
 
     UserSearchView, UserLoginView, UserLogoutView, UserProfileCreateView,
     UserProfileListAPIView, UserProfileUpdateDeleteView, UserFollowView, UserUnfollowView, UserFollowingListView,
-    UserFollowerListView,
+    UserFollowerListView, UserProfileView, UserProfileDetailView,
 )
 
 @api_view(['GET'])
@@ -36,6 +36,8 @@ def user_endpoints(request):
         'Unfollow User': f"{base_url}unfollow/<int:pk>/",
         'Following Users': f"{base_url}following/",
         'Users Followers': f"{base_url}followers/",
+        'My profiles': f"{base_url}profile/",
+        'Users Profiles': f"{base_url}profile/<str:username>/",
 
     }
     return Response(endpoints)
@@ -58,10 +60,12 @@ urlpatterns = [
     path('profiles/<int:pk>/', UserProfileUpdateDeleteView.as_view(), name='profile-update'),
     # path('profiles/<int:profile_id>/retrieve/', UserProfileRetrieveAPIView.as_view(), name='profile-retrieve'),
     path('profiles/', UserProfileListAPIView.as_view(), name='profile-list'),
-    path('follow/<int:pk>/', UserFollowView.as_view(), name='user_follow'),
-    path('unfollow/<int:pk>/', UserUnfollowView.as_view(), name='user_unfollow'),
+    path('follow/<int:user_pk>/', UserFollowView.as_view(), name='user_follow'),
+    path('unfollow/<int:user_pk>/', UserUnfollowView.as_view(), name='user_unfollow'),
     path('following/', UserFollowingListView.as_view(), name='user_following'),
     path('followers/', UserFollowerListView.as_view(), name='user_followers'),
+    path('profile/', UserProfileView.as_view(), name='user_profile'),
+    path('profile/<str:username>/', UserProfileDetailView.as_view(), name='user_profile_detail'),
 ]
 
 

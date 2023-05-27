@@ -42,10 +42,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    username = None
     email = models.EmailField(_("email address"), unique=True)
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', blank=True)
-
 
     def follow(self, user):
         self.following.add(user)
@@ -59,8 +57,8 @@ class User(AbstractUser):
     def get_followers(self):
         return self.followers.all()
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     objects = UserManager()
 
@@ -77,6 +75,5 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     bio = models.TextField(blank=True)
 
-
     def __str__(self):
-        return self.user.username
+        return self.user.username if self.user else ""

@@ -51,7 +51,7 @@ class UserLogoutSerializer(serializers.Serializer):
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ['username']
 
 class FollowerSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,10 +1,15 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from user.models import Follower
+from . import models
 from .models import Post
 from .serializers import PostSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -21,38 +26,32 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
-#
-# class FollowerViewSet(viewsets.ModelViewSet):
-#     queryset = Follower.objects.all()
-#     serializer_class = FollowerSerializer
-#
-#     @action(detail=False, methods=["get"])
-#     def followers(self, request, username=None):
-#         user = request.user
-#         followers = self.queryset.filter(followed_user__username=username)
-#         serializer = self.get_serializer(followers, many=True)
-#         return Response(serializer.data)
-#
-#     @action(detail=False, methods=["get"])
-#     def following(self, request, username=None):
-#         user = request.user
-#         following = self.queryset.filter(user__username=username)
-#         serializer = self.get_serializer(following, many=True)
-#         return Response(serializer.data)
-#
-#     @action(detail=False, methods=["post"])
-#     def follow(self, request, username=None):
-#         user = request.user
-#         serializer = FollowerCreateSerializer(
-#             data={"user": user.id, "followed_user": username}
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-#
-#     @action(detail=False, methods=["delete"])
-#     def unfollow(self, request, username=None):
-#         user = request.user
-#         follower = self.queryset.get(user=user, followed_user__username=username)
-#         follower.delete()
-#         return Response(status=204)
+
+
+class CreatePostView(APIView):
+    def post(self, request):
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+class RetrieveOwnPostsView(APIView):
+    def get(self, request):
+        posts = Post.objects.filter(user=request.user)
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+class RetrieveFollowingPostsView(APIView):
+    def get(self, request):
+        following_users = request.user.following.all()
+        posts = Post.objects.filter(user__in=following_users)
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+class RetrievePostsByHashtagView(APIView):
+    def get(self, request):
+        hashtag = request.query_params.get('hashtag')
+        posts = Post.objects.filter(hashtags__name=hashtag)
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
