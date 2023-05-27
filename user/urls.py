@@ -12,8 +12,9 @@ from user.views import (
     CreateUserView,
     ManageUserView,
 
-    UserSearchView, UserLoginView, UserLogoutView, UserProfileCreateAPIView, UserProfileUpdateAPIView,
-    UserProfileRetrieveAPIView, UserProfileListAPIView,
+    UserSearchView, UserLoginView, UserLogoutView, UserProfileCreateView,
+    UserProfileListAPIView, UserProfileUpdateDeleteView, UserFollowView, UserUnfollowView, UserFollowingListView,
+    UserFollowerListView,
 )
 
 @api_view(['GET'])
@@ -29,10 +30,15 @@ def user_endpoints(request):
         'Manage User': f"{base_url}me/",
         'Search Users': f"{base_url}users/search/",
         'User Profiles': f"{base_url}profiles/",
+        'Update/Delete User Profiles': f"{base_url}profiles/<int:pk>/",
+        'Create User Profiles': f"{base_url}profiles/create/",
+        'Follow User': f"{base_url}follow/<int:pk>/",
+        'Unfollow User': f"{base_url}unfollow/<int:pk>/",
+        'Following Users': f"{base_url}following/",
+        'Users Followers': f"{base_url}followers/",
+
     }
     return Response(endpoints)
-
-
 
 
 
@@ -48,11 +54,16 @@ urlpatterns = [
     path("me/", ManageUserView.as_view(), name="manage"),
     path("users/search/", UserSearchView.as_view(), name="user-search"),
 
-    path('profiles/', UserProfileCreateAPIView.as_view(), name='profile-create'),
-    path('profiles/<int:profile_id>/', UserProfileUpdateAPIView.as_view(), name='profile-update'),
-    path('profiles/<int:profile_id>/', UserProfileRetrieveAPIView.as_view(), name='profile-retrieve'),
+    path('profiles/create/', UserProfileCreateView.as_view(), name='profile-create'),
+    path('profiles/<int:pk>/', UserProfileUpdateDeleteView.as_view(), name='profile-update'),
+    # path('profiles/<int:profile_id>/retrieve/', UserProfileRetrieveAPIView.as_view(), name='profile-retrieve'),
     path('profiles/', UserProfileListAPIView.as_view(), name='profile-list'),
+    path('follow/<int:pk>/', UserFollowView.as_view(), name='user_follow'),
+    path('unfollow/<int:pk>/', UserUnfollowView.as_view(), name='user_unfollow'),
+    path('following/', UserFollowingListView.as_view(), name='user_following'),
+    path('followers/', UserFollowerListView.as_view(), name='user_followers'),
 ]
+
 
 
 app_name = "user"

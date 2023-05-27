@@ -44,11 +44,32 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    following = models.ManyToManyField('self', symmetrical=False, related_name='followers', blank=True)
+
+
+    def follow(self, user):
+        self.following.add(user)
+
+    def unfollow(self, user):
+        self.following.remove(user)
+
+    def get_following(self):
+        return self.following.all()
+
+    def get_followers(self):
+        return self.followers.all()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+class Follower(models.Model):
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_followers')
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_following')
+
+    def __str__(self):
+        return f'{self.follower.username} follows {self.following.username}'
 
 
 class UserProfile(models.Model):
