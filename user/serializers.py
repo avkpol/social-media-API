@@ -7,18 +7,17 @@ from user.models import UserProfile, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ["username", "email", "password"]
 
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -42,9 +41,10 @@ class UserLogoutSerializer(serializers.Serializer):
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ["username"]
+
 
 class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ["id", "username"]

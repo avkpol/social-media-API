@@ -5,9 +5,8 @@ from .models import Post
 
 
 class PostSerializer(serializers.ModelSerializer):
+    media = serializers.FileField(required=False)
 
     class Meta:
         model = Post
-        fields = ['id', 'content', 'media']
-
-
+        fields = ["id", "content", "media"]

@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from user.models import Follower
 
@@ -16,34 +17,34 @@ from django.http import HttpRequest
 from user.urls import user_endpoints
 
 
-
-@api_view(['GET'])
+@api_view(["GET"])
 def all_endpoints(request):
     http_request = request._request  # Get the original HttpRequest object
     user_endpoints_dict = user_endpoints(http_request).data
     post_endpoints_dict = post_endpoints(http_request).data
 
     endpoints = {
-        'User Endpoints': user_endpoints_dict,
-        'Sonet Endpoints': post_endpoints_dict,
+        "User Endpoints": user_endpoints_dict,
+        "Sonet Endpoints": post_endpoints_dict,
     }
 
     return Response(endpoints)
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 def post_endpoints(request):
-    base_url = request.build_absolute_uri('/api/sonet/post/')
+    base_url = request.build_absolute_uri("/api/sonet/post/")
     endpoints = {
-        'Post creation': f"{base_url}create/",
-        'Retrieve own posts': f"{base_url}own/",
-        'Retrieve following posts': f"{base_url}following/",
-        'Retrieve posts by hashtag': f"{base_url}by_hashtag/",
+        "Post creation": f"{base_url}create/",
+        "My posts": f"{base_url}me/",
+        "Retrieve own posts": f"{base_url}own/",
+        "Retrieve following posts": f"{base_url}following/",
+        "Retrieve posts by hashtag": f"{base_url}by_hashtag/",
     }
     return Response(endpoints)
 
 
-
-@api_view(['GET'])
+@api_view(["GET"])
 def sonet_endpoints(request):
     http_request = HttpRequest()
     http_request.method = request.method
@@ -55,8 +56,8 @@ def sonet_endpoints(request):
     post_endpoints_dict = post_endpoints(http_request).data
 
     endpoints = {
-        'User Endpoints': user_endpoints_dict,
-        'Sonet Endpoints': post_endpoints_dict,
+        "User Endpoints": user_endpoints_dict,
+        "Sonet Endpoints": post_endpoints_dict,
     }
 
     return Response(endpoints)
@@ -77,10 +78,10 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 class CreatePostView(APIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = PostSerializer(data=request.data)
@@ -89,11 +90,13 @@ class CreatePostView(APIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
 class RetrieveOwnPostsView(APIView):
     def get(self, request):
         posts = Post.objects.filter(user=request.user)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
 
 class RetrieveFollowingPostsView(APIView):
     def get(self, request):
@@ -102,9 +105,10 @@ class RetrieveFollowingPostsView(APIView):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
+
 class RetrievePostsByHashtagView(APIView):
     def get(self, request):
-        hashtag = request.query_params.get('hashtag')
+        hashtag = request.query_params.get("hashtag")
         posts = Post.objects.filter(hashtags__name=hashtag)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
