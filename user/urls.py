@@ -21,7 +21,7 @@ from user.views import (
     UserFollowerListView,
     UserProfileView,
     UserProfileDetailView,
-    user_endpoints,
+    user_endpoints, UserListAPIView,
 )
 
 
@@ -43,6 +43,7 @@ urlpatterns = [
         UserProfileUpdateDeleteView.as_view(),
         name="profile-update",
     ),
+    path("user/all/", UserListAPIView.as_view(), name='user-list'),
     path("user/profiles/", UserProfileListAPIView.as_view(), name="profile-list"),
     path("user/follow/<int:user_pk>/", UserFollowView.as_view(), name="user_follow"),
     path(

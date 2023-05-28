@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -40,8 +41,12 @@ def post_endpoints(request):
         "Retrieve own posts": f"{base_url}own/",
         "Retrieve following posts": f"{base_url}following/",
         "Retrieve posts by hashtag": f"{base_url}by_hashtag/",
+        "Choose post to like": f"{base_url}post/<int:post_id>/like/",
+        "Liked posts": f"{base_url}user/liked_posts/",
+
     }
     return Response(endpoints)
+
 
 
 @api_view(["GET"])
@@ -112,3 +117,26 @@ class RetrievePostsByHashtagView(APIView):
         posts = Post.objects.filter(hashtags__name=hashtag)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+class LikePostView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user
+        if post.likes.filter(id=user.id).exists():
+            post.likes.remove(user)
+            return Response({'detail': 'Post unliked'}, status=status.HTTP_200_OK)
+        else:
+            post.likes.add(user)
+            return Response({'detail': 'Post liked'}, status=status.HTTP_200_OK)
+
+
+
+class LikedPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.liked_posts.all()

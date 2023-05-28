@@ -5,14 +5,31 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models import UserProfile, User
 
-
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ["username", "email", "password"]
+        fields = ["username", "email", "password", "selected"]
 
+
+class SelectedUserSerializer(serializers.ModelSerializer):
+    selected = serializers.MultipleChoiceField(choices=[], write_only=True)
+
+
+    class Meta:
+        model = get_user_model()
+        fields = ["selected"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        users = User.objects.all()
+        self.fields['selected'].choices = [(user.id, user.username) for user in users]
+
+    def update(self, instance, validated_data):
+        selected = validated_data.pop('selected', [])
+        instance.following.set(selected)
+        return instance
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:

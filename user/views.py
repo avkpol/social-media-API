@@ -5,7 +5,7 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveUpdateDestroyAPIView,
     ListAPIView,
-    get_object_or_404,
+    get_object_or_404, ListCreateAPIView,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -15,8 +15,7 @@ from rest_framework.response import Response
 
 from sonet.models import Post
 from sonet.serializers import PostSerializer
-from user.serializers import UserSerializer
-
+from user.serializers import UserSerializer, SelectedUserSerializer
 
 from django.contrib.auth.models import User
 from rest_framework import generics, viewsets, filters, status
@@ -51,6 +50,7 @@ def user_endpoints(request):
         "User Profiles": f"{base_url}profiles/",
         "Update/Delete User Profiles": f"{base_url}profiles/<int:pk>/",
         "Create User Profiles": f"{base_url}profiles/create/",
+        "Retrieve all users": f"{base_url}all/",
         "Follow User": f"{base_url}follow/<int:pk>/",
         "Unfollow User": f"{base_url}unfollow/<int:pk>/",
         "Following Users": f"{base_url}following/",
@@ -234,3 +234,16 @@ class MyPostsView(APIView):
         posts = Post.objects.filter(user__in=following_users) | Post.objects.filter(user=user)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+
+class UserListAPIView(ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = SelectedUserSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        users = serializer.validated_data
+        selected = [user for user in users if user.get('selected')]
+        # Perform the follow operation with selected_users
+        return Response(serializer.data, status=201)
