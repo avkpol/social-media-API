@@ -28,3 +28,6 @@ class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_likes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Hashtag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
