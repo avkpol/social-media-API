@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model, authenticate
+from rest_framework.decorators import api_view
 
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -20,6 +21,35 @@ from user.serializers import UserSerializer, UserLoginSerializer, UserLogoutSeri
     FollowingSerializer, FollowerSerializer
 
 User = get_user_model()
+
+
+
+@api_view(['GET'])
+def user_endpoints(request):
+    base_url = request.build_absolute_uri('/api/user/')
+    endpoints = {
+        'Login': f"{base_url}login/",
+        'Logout': f"{base_url}logout/",
+        'Register': f"{base_url}register/",
+        'Token': f"{base_url}token/",
+        'Refresh Token': f"{base_url}token/refresh/",
+        'Verify Token': f"{base_url}token/verify/",
+        'Manage User': f"{base_url}me/",
+        'Search Users': f"{base_url}users/search/",
+        'User Profiles': f"{base_url}profiles/",
+        'Update/Delete User Profiles': f"{base_url}profiles/<int:pk>/",
+        'Create User Profiles': f"{base_url}profiles/create/",
+        'Follow User': f"{base_url}follow/<int:pk>/",
+        'Unfollow User': f"{base_url}unfollow/<int:pk>/",
+        'Following Users': f"{base_url}following/",
+        'Users Followers': f"{base_url}followers/",
+        'My profiles': f"{base_url}profile/",
+        'Users Profiles': f"{base_url}profile/<str:username>/",
+
+    }
+    return Response(endpoints)
+
+
 
 class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
@@ -181,5 +211,5 @@ class UserProfileView(APIView):
 class UserProfileDetailView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-    lookup_field = 'username'
+    lookup_field = "username"
 

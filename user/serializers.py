@@ -7,33 +7,24 @@ from user.models import UserProfile, User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'email', 'password']
+        fields = ["username", "email", "password"]
 
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField()
-#     password = serializers.CharField(write_only=True)
-#     class Meta:
-#         model = UserProfile
-#         fields = ["user", 'profile_picture', 'bio']
-#
-#     def create(self, validated_data):
-#         user = self.context['request'].user
-#         profile = UserProfile.objects.create(user=user, **validated_data)
-#         return profile
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
 
+
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
 
 class UserLogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()

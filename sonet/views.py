@@ -1,15 +1,64 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from user.models import Follower
-from . import models
-from .models import Post
-from .serializers import PostSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
+
+from sonet.models import Post
+from sonet.serializers import PostSerializer
+
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import HttpRequest
+
+
+from user.urls import user_endpoints
+
+
+
+@api_view(['GET'])
+def all_endpoints(request):
+    http_request = request._request  # Get the original HttpRequest object
+    user_endpoints_dict = user_endpoints(http_request).data
+    post_endpoints_dict = post_endpoints(http_request).data
+
+    endpoints = {
+        'User Endpoints': user_endpoints_dict,
+        'Sonet Endpoints': post_endpoints_dict,
+    }
+
+    return Response(endpoints)
+
+@api_view(['GET'])
+def post_endpoints(request):
+    base_url = request.build_absolute_uri('/api/sonet/post/')
+    endpoints = {
+        'Post creation': f"{base_url}create/",
+        'Retrieve own posts': f"{base_url}own/",
+        'Retrieve following posts': f"{base_url}following/",
+        'Retrieve posts by hashtag': f"{base_url}by_hashtag/",
+    }
+    return Response(endpoints)
+
+
+
+@api_view(['GET'])
+def sonet_endpoints(request):
+    http_request = HttpRequest()
+    http_request.method = request.method
+    http_request.META = request.META
+    http_request.GET = request.GET
+    http_request.POST = request.POST
+
+    user_endpoints_dict = user_endpoints(http_request).data
+    post_endpoints_dict = post_endpoints(http_request).data
+
+    endpoints = {
+        'User Endpoints': user_endpoints_dict,
+        'Sonet Endpoints': post_endpoints_dict,
+    }
+
+    return Response(endpoints)
 
 
 class PostViewSet(viewsets.ModelViewSet):

@@ -17,8 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from sonet.views import all_endpoints
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/user/", include("user.urls")),
-    path('api/sonet/', include('sonet.urls')),
+    path("", all_endpoints, name="all-endpoints"),
+    path('api/sonet/', all_endpoints, name='all-endpoints'),
+    path("api/", include("user.urls")),
+    path('api/', include('sonet.urls')),
+
 ]
