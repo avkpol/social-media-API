@@ -6,7 +6,11 @@ from .models import Post, Hashtag, Like
 
 class PostSerializer(serializers.ModelSerializer):
     media = serializers.FileField(required=False)
-    hashtag = serializers.CharField(max_length=255, write_only=True)
+    hashtag = serializers.SlugRelatedField(
+        many=True,
+        slug_field='name',
+        read_only=True
+    )
     likes = serializers.SerializerMethodField()
 
     class Meta:

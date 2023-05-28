@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status, generics, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -41,7 +41,7 @@ def post_endpoints(request):
         "Retrieve own posts": f"{base_url}own/",
         "Retrieve following posts": f"{base_url}following/",
         "Retrieve posts by hashtag": f"{base_url}by_hashtag/",
-        "Choose post to like": f"{base_url}post/<int:post_id>/like/",
+        "Choose post to like": f"{base_url}<int:post_id>/like/",
         "Liked posts": f"{base_url}user/liked_posts/",
 
     }
@@ -114,7 +114,7 @@ class RetrieveFollowingPostsView(APIView):
 class RetrievePostsByHashtagView(APIView):
     def get(self, request):
         hashtag = request.query_params.get("hashtag")
-        posts = Post.objects.filter(hashtags__name=hashtag)
+        posts = Post.objects.filter(hashtag__name=hashtag)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
@@ -140,3 +140,11 @@ class LikedPostsView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return user.liked_posts.all()
+
+
+
+class PostSearchView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["hashtag__name"]
