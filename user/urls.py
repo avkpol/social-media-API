@@ -40,14 +40,5 @@ urlpatterns = [
     path('user/profile/<str:username>/', UserProfileDetailView.as_view(), name='user_profile_detail'),
 ]
 
-@api_view(['GET'])
-def user_endpoints(request):
-    base_url = request.build_absolute_uri('/api/user/')
-    endpoints = {
-        # Other endpoints
-        'Search Users': f"{base_url}users/search/",
-        # Other endpoints
-    }
-    return Response(endpoints)
 
 app_name = "user"

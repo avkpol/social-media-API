@@ -35,7 +35,7 @@ def user_endpoints(request):
         'Refresh Token': f"{base_url}token/refresh/",
         'Verify Token': f"{base_url}token/verify/",
         'Manage User': f"{base_url}me/",
-        'Search Users': f"{base_url}users/search/",
+         'Search Users': f"{base_url}users/search/",
         'User Profiles': f"{base_url}profiles/",
         'Update/Delete User Profiles': f"{base_url}profiles/<int:pk>/",
         'Create User Profiles': f"{base_url}profiles/create/",
