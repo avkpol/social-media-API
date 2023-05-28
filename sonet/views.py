@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from user.models import Follower
@@ -78,6 +79,9 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
 class CreatePostView(APIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():

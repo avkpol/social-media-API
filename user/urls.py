@@ -1,4 +1,6 @@
 from django.urls import path
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -37,5 +39,15 @@ urlpatterns = [
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
     path('user/profile/<str:username>/', UserProfileDetailView.as_view(), name='user_profile_detail'),
 ]
+
+@api_view(['GET'])
+def user_endpoints(request):
+    base_url = request.build_absolute_uri('/api/user/')
+    endpoints = {
+        # Other endpoints
+        'Search Users': f"{base_url}users/search/",
+        # Other endpoints
+    }
+    return Response(endpoints)
 
 app_name = "user"

@@ -65,7 +65,8 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 class UserProfileCreateView(CreateAPIView):
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -109,21 +110,11 @@ class UserProfileListAPIView(APIView):
         return Response(serializer.data)
 
 
-class UserSearchView(APIView):
-    def get(self, request):
-        query = request.query_params.get('query', )
-        users = []
-        if query:
-            users = User.objects.filter(username__icontains=query)
-            # Add additional filtering criteria if needed
-            # For example: users = User.objects.filter(email__icontains=query)
-        serializer = UserSerializer(users, many=True)
-        response_data = {
-            'query': query,
-            'results': serializer.data
-        }
-        return Response(response_data)
-
+class UserSearchView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email']  # Add any other fields you want to search
 
 
 class UserLoginView(APIView):
