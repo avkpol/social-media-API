@@ -16,6 +16,7 @@ from django.http import HttpRequest
 
 
 from user.urls import user_endpoints
+from user.views import User
 
 
 @api_view(["GET"])
@@ -143,8 +144,20 @@ class LikedPostsView(generics.ListAPIView):
 
 
 
+# class PostSearchView(generics.ListAPIView):
+#     serializer_class = PostSerializer
+#     queryset = Post.objects.all()
+#     filter_backends = [filters.SearchFilter]
+#     search_fields = ["hashtag__name"]
+
+
 class PostSearchView(generics.ListAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     filter_backends = [filters.SearchFilter]
     search_fields = ["hashtag__name"]
+
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        profile, created = User.objects.update_or_create(user=user, defaults=serializer.validated_data)

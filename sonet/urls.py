@@ -9,13 +9,13 @@ from sonet.views import (
     RetrievePostsByHashtagView, LikePostView, LikedPostsView, PostSearchView,
 
 )
-from user.views import MyPostsView
+# from user.views import MyPostsView
 
 router = DefaultRouter()
 router.register(r"post", PostViewSet, basename="post")
 
 urlpatterns = [
-    path('me/', MyPostsView.as_view(), name='my-posts'),
+    # path('me/', MyPostsView.as_view(), name='my-posts'),
     path("create/", CreatePostView.as_view(), name="create_post"),
     path("own/", RetrieveOwnPostsView.as_view(), name="own_posts"),
     path("following/", RetrieveFollowingPostsView.as_view(), name="following_posts"),

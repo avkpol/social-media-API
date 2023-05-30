@@ -6,16 +6,15 @@ from .models import Post, Hashtag, Like
 
 class PostSerializer(serializers.ModelSerializer):
     media = serializers.FileField(required=False)
-    hashtag = serializers.SlugRelatedField(
-        many=True,
-        slug_field='name',
-        read_only=True
-    )
-    likes = serializers.SerializerMethodField()
+    # hashtag = serializers.SerializerMethodField()
+    hashtag = serializers.CharField(max_length=55, required=False)
 
     class Meta:
         model = Post
-        fields = ['id', 'content', 'media', 'hashtag', "likes"]
+        fields = ['id', 'content', 'media', 'hashtag']
+
+    def get_hashtag(self, obj):
+        return [hashtag.name for hashtag in obj.hashtag.all()]
 
     def create(self, validated_data):
         hashtag_data = validated_data.pop('hashtag', '')
