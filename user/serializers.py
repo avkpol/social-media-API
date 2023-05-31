@@ -7,17 +7,18 @@ from user.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
         model = get_user_model()
         fields = ["id", "username", "email", "password"]
 
-    def create(self,validated_data):
+    def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
 
     # def update(self):
+
 
 # class UserProfileSerializer(serializers.ModelSerializer):
 #     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
@@ -32,11 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
 #         return user_profile
 
 
-    # def create(self, validated_data):
-    #     # user_profile = UserProfile.objects.get_or_create(user=self.context['request'].user, **validated_data)
-    #     return get_user_model().objects.user_profile(**validated_data)
-
-
+# def create(self, validated_data):
+#     # user_profile = UserProfile.objects.get_or_create(user=self.context['request'].user, **validated_data)
+#     return get_user_model().objects.user_profile(**validated_data)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -48,18 +47,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'profile_picture', 'bio', 'following', 'follow')
-        read_only_fields = ('username', 'profile_picture', 'bio', 'following',)
+        fields = ("username", "profile_picture", "bio", "following", "follow")
+        read_only_fields = (
+            "username",
+            "profile_picture",
+            "bio",
+            "following",
+        )
 
     def get_following(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user.is_authenticated:
             return obj.user.followers.filter(pk=request.user.pk).exists()
         return False
-
-
-
-
 
 
 # class UserProfileSerializer(serializers.Serializer):
@@ -90,7 +90,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 #         pass
 
 
-
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(style={"input_type": "password"}, write_only=True)
@@ -112,9 +111,10 @@ class UserLogoutSerializer(serializers.Serializer):
 class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username']
+        fields = ["username"]
+
 
 class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username']
+        fields = ["id", "username"]
