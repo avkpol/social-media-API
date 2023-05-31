@@ -18,17 +18,20 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     hashtag = models.ManyToManyField(Hashtag, related_name='posts', blank=True)
     likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
-    comments = models.ManyToManyField(User, through='Comment', related_name='commented_posts', blank=True)
+    comment = models.ManyToManyField(User, through='Comment', related_name='post_comments', blank=True)
 
     def __str__(self):
         return f"Post {self.id} by {self.user.username}"
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on Post {self.post.id}"
 
 
 class Like(models.Model):

@@ -22,7 +22,7 @@ from sonet.views import all_endpoints
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", all_endpoints, name="all-endpoints"),
-    path('api/sonet/', all_endpoints, name='all-endpoints'),
+    # path('api/sonet/', all_endpoints, name='all-endpoints'),
     path("api/", include("user.urls")),
     path('api/sonet/post/', include('sonet.urls')),
 

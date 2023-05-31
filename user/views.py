@@ -101,45 +101,6 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
-# class UserProfileCreateView(CreateAPIView):
-#     serializer_class = UserSerializer
-#
-#     def create(self, request, *args, **kwargs):
-#         user_serializer = self.get_serializer(data=request.data)
-#         profile_serializer = UserProfileSerializer(data=request.data.get('profile'))
-#
-#         user_serializer.is_valid(raise_exception=True)
-#         profile_serializer.is_valid(raise_exception=True)
-#
-#         user = user_serializer.save()
-#         profile_serializer.save(user=user)
-#
-#         headers = self.get_success_headers(user_serializer.data)
-#         return Response(user_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-# class UserProfileUpdateDeleteView(RetrieveUpdateDestroyAPIView):
-#     queryset = UserProfile.objects.all()
-#     serializer_class = UserProfileSerializer
-#     lookup_field = 'pk'
-#
-#     def get(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance)
-#         return Response(serializer.data)
-#
-#     def put(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def delete(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         self.perform_destroy(instance)
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-#
 
 class UserProfileUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     authentication_classes = (JWTAuthentication,)
@@ -205,18 +166,6 @@ class UserDetailView(generics.RetrieveAPIView):
         return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-# class UserProfileRetrieveAPIView(APIView):
-#     def get(self, request, profile_id):
-#         profile = UserProfile.objects.get(pk=profile_id)
-#         serializer = UserProfileSerializer(profile)
-#         return Response(serializer.data)
-
-# class UserProfileListAPIView(APIView):
-#     def get(self, request):
-#         profiles = UserProfile.objects.all()
-#         serializer = UserProfileSerializer(profiles, many=True)
-#         return Response(serializer.data)
-
 
 class UserProfileListAPIView(APIView):
     def get(self, request):
@@ -232,65 +181,6 @@ class UserSearchView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'email']
 
-
-#
-# class UserFollowView(APIView):
-#     serializer_class = UserProfileSerializer
-#
-#     def post(self, request, user_pk):
-#         user = request.user
-#         try:
-#             target_user = get_object_or_404(User, id=user_pk)
-#             user.follow(target_user)
-#             serializer = FollowingSerializer(target_user)
-#             return Response(serializer.data)
-#         except User.DoesNotExist:
-#             return Response({'detail': 'User not found.'}, status=404)
-#
-#
-# class UserUnfollowView(APIView):
-#     serializer_class = UserProfileSerializer
-#
-#     def post(self, request, user_pk):
-#         user = request.user
-#         try:
-#             target_user = User.objects.get()
-#             user.unfollow(target_user)
-#             return Response({'detail': 'User unfollowed successfully.'})
-#         except User.DoesNotExist:
-#             return Response({'detail': 'User not found.'}, status=404)
-
-
-# class UserFollowingListView(APIView):
-#     def get(self, request):
-#         user = request.user
-#         following = user.get_following()
-#         serializer = FollowingSerializer(following, many=True)
-#         return Response(serializer.data)
-#
-#
-# class UserFollowerListView(APIView):
-#     def get(self, request):
-#         user = request.user
-#         followers = user.get_followers()
-#         serializer = FollowerSerializer(followers, many=True)
-#         return Response(serializer.data)
-
-
-
-# class UserProfileView(APIView):
-#     serializer_class = UserProfileSerializer
-#     lookup_field = 'user__username'
-#
-#     def get(self, request, username):
-#         profile = get_object_or_404(UserProfile, user__username=username)
-#         serializer = UserProfileSerializer(profile)
-#         return Response(serializer.data)
-#
-# class UserProfileDetailView(generics.RetrieveAPIView):
-#     queryset = UserProfile.objects.all()
-#     serializer_class = UserProfileSerializer
-#     lookup_field = "username"
 
 class FollowingUserListAPIView(APIView):
     def get(self, request):

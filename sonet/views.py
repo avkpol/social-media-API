@@ -8,7 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.models import Follower
 
 from sonet.models import Post
-from sonet.serializers import PostSerializer
+from sonet.serializers import PostSerializer, LikeSerializer
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -44,6 +44,8 @@ def post_endpoints(request):
         "Retrieve posts by hashtag": f"{base_url}by_hashtag/",
         "Choose post to like": f"{base_url}<int:post_id>/like/",
         "Liked posts": f"{base_url}user/liked_posts/",
+        "Post detail": f"{base_url}'<int:post_id>/'",
+
 
     }
     return Response(endpoints)
@@ -98,6 +100,7 @@ class CreatePostView(APIView):
 
 
 class RetrieveOwnPostsView(APIView):
+
     def get(self, request):
         posts = Post.objects.filter(user=request.user)
         serializer = PostSerializer(posts, many=True)
@@ -105,6 +108,7 @@ class RetrieveOwnPostsView(APIView):
 
 
 class RetrieveFollowingPostsView(APIView):
+
     def get(self, request):
         following_users = request.user.following.all()
         posts = Post.objects.filter(user__in=following_users)
@@ -113,34 +117,52 @@ class RetrieveFollowingPostsView(APIView):
 
 
 class RetrievePostsByHashtagView(APIView):
+
     def get(self, request):
         hashtag = request.query_params.get("hashtag")
         posts = Post.objects.filter(hashtag__name=hashtag)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
+# class LikePostView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request, post_id):
+#         post = Post.objects.get(pk=post_id)
+#         user = request.user
+#         if post.likes.filter(pk=user.pk).exists():
+#
+#             post.likes.remove(user)
+#             return Response({'status': 'unliked'}, status=status.HTTP_200_OK)
+#         else:
+#
+#             post.likes.add(user)
+#             return Response({'status': 'liked'}, status=status.HTTP_200_OK)
+
+
 class LikePostView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post = Post.objects.get(pk=post_id)
         user = request.user
-        if post.likes.filter(id=user.id).exists():
+        if post.likes.filter(pk=user.pk).exists():
             post.likes.remove(user)
-            return Response({'detail': 'Post unliked'}, status=status.HTTP_200_OK)
+            return Response({'status': 'unliked'}, status=status.HTTP_200_OK)
         else:
             post.likes.add(user)
-            return Response({'detail': 'Post liked'}, status=status.HTTP_200_OK)
+            return Response({'status': 'liked'}, status=status.HTTP_200_OK)
+
+    # def get(self, request):
+    #
+    #     if request.user.is_authenticated:
+    #         liked_posts = request.user.liked_posts.all()
+    #         serializer = LikeSerializer(liked_posts, many=True)
+    #         return Response(serializer.data)
+    #     return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 
-class LikedPostsView(generics.ListAPIView):
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return user.liked_posts.all()
 
 
 
@@ -177,3 +199,43 @@ class FollowingPostListView(generics.ListAPIView):
         queryset = Post.objects.filter(author__in=following_users)
 
         return queryset
+
+
+class PostDetailView(generics.RetrieveAPIView):
+    serializer_class = PostSerializer
+
+    def get(self, request, *args, **kwargs):
+        post_id = kwargs['pk']
+        post = Post.objects.get(pk=post_id)
+        serializer = self.serializer_class(post)
+        data = serializer.data
+        data['likes_count'] = post.likes.count()
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        post_id = kwargs['pk']
+        post = Post.objects.get(pk=post_id)
+        user = request.user
+        if post.likes.filter(pk=user.pk).exists():
+            post.likes.remove(user)
+            return Response({'status': 'unliked'}, status=status.HTTP_200_OK)
+        else:
+            post.likes.add(user)
+            return Response({'status': 'liked'}, status=status.HTTP_200_OK)
+
+
+class LikedPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Post.objects.filter(likes=user)
+
+# class LikedPostsView(generics.ListAPIView):
+#     serializer_class = PostSerializer
+#     permission_classes = [IsAuthenticated]
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         return user.liked_posts.all()

@@ -5,13 +5,16 @@ from .models import Post, Hashtag, Like
 
 
 class PostSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
+    like = serializers.BooleanField(write_only=True, default=False)
+    likes_count = serializers.SerializerMethodField()
     media = serializers.FileField(required=False)
-    # hashtag = serializers.SerializerMethodField()
     hashtag = serializers.CharField(max_length=55, required=False)
 
     class Meta:
         model = Post
-        fields = ['id', 'content', 'media', 'hashtag']
+        fields = ['id', 'content', 'media', 'hashtag', 'author',  'created_at', 'updated_at', 'like', 'likes_count']
+        read_only_fields = ('id', 'created_at', 'updated_at', 'likes_count')
 
     def get_hashtag(self, obj):
         return [hashtag.name for hashtag in obj.hashtag.all()]
@@ -27,8 +30,11 @@ class PostSerializer(serializers.ModelSerializer):
 
         return post
 
-    def get_likes(self, obj):
+    def get_likes_count(self, obj):
         return obj.likes.count()
+
+
+
 
 
 class LikeSerializer(serializers.ModelSerializer):

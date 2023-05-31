@@ -6,7 +6,7 @@ from sonet.views import (
     CreatePostView,
     RetrieveOwnPostsView,
     RetrieveFollowingPostsView,
-    RetrievePostsByHashtagView, LikePostView, LikedPostsView, PostSearchView,
+    RetrievePostsByHashtagView, LikePostView, LikedPostsView, PostSearchView, PostDetailView,
 
 )
 # from user.views import MyPostsView
@@ -21,8 +21,9 @@ urlpatterns = [
     path("following/", RetrieveFollowingPostsView.as_view(), name="following_posts"),
     path("by_hashtag/", PostSearchView.as_view(), name="posts_by_hashtag"),
     path("api/", include(router.urls)),
-    path('<int:post_id>/like/', LikePostView.as_view(), name='like-post'),
+    path('<int:pk>/like/', LikePostView.as_view(), name='like-post'),
     path('user/liked_posts/', LikedPostsView.as_view(), name='liked-posts'),
+    path('<int:pk>/', PostDetailView.as_view(), name='post-detail'),
 ]
 
 app_name = "sonet"
