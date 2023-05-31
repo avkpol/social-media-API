@@ -21,7 +21,7 @@ from user.views import (
     # UserFollowerListView,
     # UserProfileView,
     # UserProfileDetailView,
-    user_endpoints, UserDetailView,
+    user_endpoints, UserDetailView, FollowingUserListAPIView,
 )
 
 
@@ -50,7 +50,7 @@ urlpatterns = [
     # path(
     #     "user/unfollow/<int:user_pk>/", UserUnfollowView.as_view(), name="user_unfollow"
     # ),
-    # path("user/following/", UserFollowingListView.as_view(), name="user_following"),
+    path("user/following/", FollowingUserListAPIView.as_view(), name="user_following"),
     # path("user/followers/", UserFollowerListView.as_view(), name="user_followers"),
     # path("user/profile/", UserView.as_view(), name="user_profile"),
     # path(

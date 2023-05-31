@@ -169,12 +169,15 @@ class UserProfileUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
 
 class UserDetailView(generics.RetrieveAPIView):
+    # authentication_classes = (JWTAuthentication,)
+    # permission_classes = (IsAuthenticated,)
     serializer_class = UserProfileSerializer
 
     def get(self, request, pk):
         user = User.objects.get(pk=pk)
-        serializer = self.get_serializer(user, context={'request': request})
-        return Response(serializer.data)
+        serializer = self.serializer_class(user, context={'request': request})
+        data = serializer.data
+        return Response(data)
 
     def post(self, request, pk):
         user = User.objects.get(pk=pk)
@@ -182,10 +185,23 @@ class UserDetailView(generics.RetrieveAPIView):
         if request_user.is_authenticated:
             if user.followers.filter(pk=request_user.pk).exists():
                 user.followers.remove(request_user)
-                return Response({'status': 'unfollowed'}, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        "username": user.username,
+                        "profile_picture": user.profile_picture.url if user.profile_picture else None,
+                        'followed': False
+                    }, status=status.HTTP_200_OK
+                )
             else:
                 user.followers.add(request_user)
-                return Response({'status': 'followed'}, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        "username": user.username,
+                        "profile_picture": user.profile_picture.url if user.profile_picture else None,
+                        'followed': True
+                    },
+                    status=status.HTTP_200_OK
+                )
         return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -275,3 +291,11 @@ class UserSearchView(generics.ListAPIView):
 #     queryset = UserProfile.objects.all()
 #     serializer_class = UserProfileSerializer
 #     lookup_field = "username"
+
+class FollowingUserListAPIView(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            following_users = request.user.following.all()
+            serializer = UserProfileSerializer(following_users, many=True)
+            return Response(serializer.data)
+        return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)

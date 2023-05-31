@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
         model = get_user_model()
-        fields = ["username", "email", "password"]
+        fields = ["id", "username", "email", "password"]
 
     def create(self,validated_data):
         return get_user_model().objects.create_user(**validated_data)
@@ -40,18 +40,23 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    following = serializers.SerializerMethodField()
+    # username = serializers.ReadOnlyField(source='user.username')
+    # profile_picture = serializers.ReadOnlyField(source='user.profile_picture')
+
+    following = serializers.SerializerMethodField(read_only=True)
     follow = serializers.BooleanField(write_only=True, default=False)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'profile_picture', 'bio', 'following', 'followers', 'follow')
+        fields = ('username', 'profile_picture', 'bio', 'following', 'follow')
+        read_only_fields = ('username', 'profile_picture', 'bio', 'following',)
 
     def get_following(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return obj.followers.filter(pk=request.user.pk).exists()
+            return obj.user.followers.filter(pk=request.user.pk).exists()
         return False
+
 
 
 

@@ -161,3 +161,19 @@ class PostSearchView(generics.ListAPIView):
     def perform_create(self, serializer):
         user = self.request.user
         profile, created = User.objects.update_or_create(user=user, defaults=serializer.validated_data)
+
+
+class FollowingPostListView(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        # Get the currently authenticated user
+        user = self.request.user
+
+        # Get the list of users that the current user is following
+        following_users = user.following.all()
+
+        # Filter the posts based on the users being followed
+        queryset = Post.objects.filter(author__in=following_users)
+
+        return queryset
