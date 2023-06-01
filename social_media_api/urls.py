@@ -22,10 +22,9 @@ from django.conf.urls.static import static
 from sonet.views import all_endpoints
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path("", all_endpoints, name="all-endpoints"),
     # path('api/sonet/', all_endpoints, name='all-endpoints'),
     path("api/", include("user.urls")),
-    path('api/sonet/post/', include('sonet.urls')),
-
+    path("api/sonet/post/", include("sonet.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

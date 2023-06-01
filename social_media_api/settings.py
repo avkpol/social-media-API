@@ -63,7 +63,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
 ]
 
 ROOT_URLCONF = "social_media_api.urls"
@@ -96,7 +95,7 @@ WSGI_APPLICATION = "social_media_api.wsgi.application"
 #         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
-#for Docker
+# for Docker
 
 DATABASES = {
     "default": {
@@ -166,7 +165,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         # "rest_framework.authentication.TokenAuthentication",
     ),
-
 }
 
 SIMPLE_JWT = {
@@ -175,3 +173,8 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
 }
 
+CELERY_BROKER_URL = "redis://localhost: 6379"
+CELERY_RESULT_BACKEND = "redis://localhost: 6379"
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
