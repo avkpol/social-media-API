@@ -1,6 +1,5 @@
 from rest_framework import viewsets, status, generics, filters
-from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -8,9 +7,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.models import Follower
 
 from sonet.models import Post, Comment
-from sonet.serializers import PostSerializer, LikeSerializer, CommentSerializer
+from sonet.serializers import PostSerializer, CommentSerializer, LikeSerializer
 
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import HttpRequest
 
@@ -124,10 +122,11 @@ class RetrievePostsByHashtagView(APIView):
 
 
 class LikePostView(APIView):
+    serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, post_id):
-        post = Post.objects.get(pk=post_id)
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
         user = request.user
         if post.likes.filter(pk=user.pk).exists():
             post.likes.remove(user)

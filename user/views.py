@@ -20,11 +20,11 @@ from user.serializers import (
     UserSerializer,
     UserLoginSerializer,
     UserLogoutSerializer,
-    UserProfileSerializer
+    UserProfileSerializer, FollowerSerializer
 )
 
 
-# User = get_user_model()
+User = get_user_model()
 
 
 @api_view(["GET"])
@@ -39,17 +39,17 @@ def user_endpoints(request):
         "Verify Token": f"{base_url}token/verify/",
         "Manage User": f"{base_url}me/",
         "Search Users": f"{base_url}users/search/",
-        "User Profiles": f"{base_url}profiles/",
+        # "User Profiles": f"{base_url}profiles/",
         "Update/Delete User Profiles": f"{base_url}profiles/<int:pk>/",
         # 'Create User Profiles': f"{base_url}profiles/create/",
         "Follow User": f"{base_url}follow/<int:pk>/",
         "Unfollow User": f"{base_url}unfollow/<int:pk>/",
         "Following Users": f"{base_url}following/",
-        "Users Followers": f"{base_url}followers/",
+        "User's Followers": f"{base_url}<int:pk>/followers/",
         "My profiles": f"{base_url}profile/",
         # 'Users Profiles': f"{base_url}profile/<str:username>/",
-        "Users Profiles": f"{base_url}all/",
-        "Users Profile": f"{base_url}<int:pk>/",
+        "User Profiles": f"{base_url}all/",
+        "User's Profile": f"{base_url}<int:pk>/",
     }
     return Response(endpoints)
 
@@ -207,3 +207,12 @@ class FollowingUserListAPIView(APIView):
         return Response(
             {"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED
         )
+
+
+class FollowerListView(generics.ListAPIView):
+    serializer_class = FollowerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.followers.all().values('id', 'following__username', 'follower__username')
