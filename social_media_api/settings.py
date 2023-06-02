@@ -182,8 +182,8 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Cinema API",
-    "DESCRIPTION": "Management cinema system",
+    "TITLE": "Social media api",
+    "DESCRIPTION": "API for the simplified social media ",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_SETTINGS": {
