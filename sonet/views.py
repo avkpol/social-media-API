@@ -73,6 +73,24 @@ def sonet_endpoints(request):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        data["likes_count"] = instance.likes.count()
+        return Response(data)
 
     @action(detail=False, methods=["get"])
     def followed(self, request):
@@ -86,18 +104,12 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
-
-class CreatePostView(APIView):
-    serializer_class = PostSerializer
-    authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request):
-        serializer = PostSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+    @action(detail=False, methods=["get"])
+    def liked_posts(self, request):
+        user = request.user
+        liked_posts = Post.objects.filter(likes=user)
+        serializer = self.get_serializer(liked_posts, many=True)
+        return Response(serializer.data)
 
 
 class RetrieveOwnPostsView(APIView):
@@ -171,32 +183,11 @@ class FollowingPostListView(generics.ListAPIView):
         return queryset
 
 
-class PostDetailView(LikeMixin, generics.RetrieveAPIView):
-    serializer_class = PostSerializer
-    permission_classes = [IsOwnerOrReadOnly]
-
-    def get(self, request, *args, **kwargs):
-        post_id = kwargs["pk"]
-        post = Post.objects.get(pk=post_id)
-        serializer = self.serializer_class(post)
-        data = serializer.data
-        data["likes_count"] = post.likes.count()
-        return Response(data)
-
-
     def post(self, request, *args, **kwargs):
         post_id = kwargs["pk"]
         post = Post.objects.get(pk=post_id)
         user = request.user
         return self.toggle_like(post, user)
-
-class LikedPostsView(generics.ListAPIView):
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return Post.objects.filter(likes=user)
 
 
 class CommentCreateView(generics.CreateAPIView):

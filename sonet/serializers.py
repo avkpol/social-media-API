@@ -24,7 +24,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source="user.username")
-    like = serializers.BooleanField(write_only=True, default=False)
+    like = serializers.BooleanField(read_only=True, default=False)
     likes_count = serializers.SerializerMethodField()
     media = serializers.FileField(required=False)
     comments = CommentSerializer(many=True, read_only=True)
