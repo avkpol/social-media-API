@@ -54,23 +54,3 @@ handling authentication and permissions, working with models, serializers, views
 and following best practices for API design and documentation.
 
 
-### API to be created(project):
-
-```
-POST /api/user/register
-POST /api/user/login
-POST /api/user/logout
-POST /api/user/profile
-GET /api/profile/{username}
-GET /api/users?q={query}
-POST /api/follow/{username}
-DELETE /api/follow/{username}
-GET /api/followers/{username}
-GET /api/following/{username}
-POST /api/posts
-GET /api/posts/user/{username}
-GET /api/posts/followed
-GET /api/posts/hashtags/{hashtag}
-
-```
-

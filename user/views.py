@@ -12,7 +12,7 @@ from rest_framework import permissions
 from rest_framework.decorators import api_view
 from rest_framework.generics import (
     CreateAPIView,
-    RetrieveUpdateDestroyAPIView,
+    RetrieveUpdateDestroyAPIView, ListAPIView,
 )
 
 from user.models import User
@@ -20,7 +20,8 @@ from user.serializers import (
     UserSerializer,
     UserLoginSerializer,
     UserLogoutSerializer,
-    UserProfileSerializer, FollowerSerializer
+    UserProfileSerializer,
+    FollowerSerializer, FollowingSerializer,
 )
 
 
@@ -31,23 +32,18 @@ User = get_user_model()
 def user_endpoints(request):
     base_url = request.build_absolute_uri("/api/user/")
     endpoints = {
+        "Create user": f"{base_url}register/",
         "Login": f"{base_url}login/",
         "Logout": f"{base_url}logout/",
-        "Register": f"{base_url}register/",
         "Token": f"{base_url}token/",
         "Refresh Token": f"{base_url}token/refresh/",
         "Verify Token": f"{base_url}token/verify/",
-        "Manage User": f"{base_url}me/",
+        "My profile": f"{base_url}me/",
         "Search Users": f"{base_url}users/search/",
-        # "User Profiles": f"{base_url}profiles/",
         "Update/Delete User Profiles": f"{base_url}profiles/<int:pk>/",
-        # 'Create User Profiles': f"{base_url}profiles/create/",
-        "Follow User": f"{base_url}follow/<int:pk>/",
-        "Unfollow User": f"{base_url}unfollow/<int:pk>/",
         "Following Users": f"{base_url}following/",
         "User's Followers": f"{base_url}<int:pk>/followers/",
         "My profiles": f"{base_url}profile/",
-        # 'Users Profiles': f"{base_url}profile/<str:username>/",
         "User Profiles": f"{base_url}all/",
         "User's Profile": f"{base_url}<int:pk>/",
     }
@@ -94,7 +90,6 @@ class UserLogoutView(APIView):
         refresh_token = request.data.get(
             "refresh",
         )
-
         # Blacklist the refresh token to invalidate it
         try:
             token = RefreshToken(refresh_token)
@@ -141,13 +136,20 @@ class UserProfileUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 
 
 class UserDetailView(generics.RetrieveAPIView):
-    # authentication_classes = (JWTAuthentication,)
-    # permission_classes = (IsAuthenticated,)
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserProfileSerializer
 
     def get(self, request, pk):
         user = User.objects.get(pk=pk)
         serializer = self.serializer_class(user, context={"request": request})
+        data = serializer.data
+        return Response(data)
+
+    def get_followers(self, request, pk):
+        user = User.objects.get(pk=pk)
+        followers = user.followers.all()
+        serializer = self.serializer_class(followers, many=True, context={"request": request})
         data = serializer.data
         return Response(data)
 
@@ -192,27 +194,26 @@ class UserProfileListAPIView(APIView):
 
 
 class UserSearchView(generics.ListAPIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filter_backends = [filters.SearchFilter]
     search_fields = ["username", "email"]
 
 
-class FollowingUserListAPIView(APIView):
-    def get(self, request):
-        if request.user.is_authenticated:
-            following_users = request.user.following.all()
-            serializer = UserProfileSerializer(following_users, many=True)
-            return Response(serializer.data)
-        return Response(
-            {"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED
-        )
-
-
-class FollowerListView(generics.ListAPIView):
-    serializer_class = FollowerSerializer
+class FollowingUserListAPIView(ListAPIView):
+    serializer_class = FollowingSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return user.followers.all().values('id', 'following__username', 'follower__username')
+        return user.following.all()
+
+class FollowerListView(ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.followers.all()

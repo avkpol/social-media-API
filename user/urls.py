@@ -16,7 +16,8 @@ from user.views import (
     UserProfileUpdateDeleteView,
     UserDetailView,
     FollowingUserListAPIView,
-    user_endpoints, FollowerListView,
+    user_endpoints,
+    FollowerListView,
 )
 
 
@@ -38,8 +39,8 @@ urlpatterns = [
     path("user/<int:pk>/", UserDetailView.as_view(), name="user-details"),
     path("user/all/", UserProfileListAPIView.as_view(), name="user-list"),
     path("user/following/", FollowingUserListAPIView.as_view(), name="user_following"),
-    path('user/<int:pk>/followers/', FollowerListView.as_view(), name='follower-list'),
-]
+    path("user/<int:pk>/followers/", FollowerListView.as_view(), name="follower-list"),
 
+]
 
 app_name = "user"

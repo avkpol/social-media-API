@@ -9,16 +9,17 @@ from sonet.views import (
     LikePostView,
     LikedPostsView,
     PostSearchView,
-    PostDetailView, CommentCreateView, CommentListView, CommentDetailView,
+    PostDetailView,
+    CommentCreateView,
+    CommentListView,
+    CommentDetailView,
 )
-
 
 
 router = DefaultRouter()
 router.register(r"post", PostViewSet, basename="post")
 
 urlpatterns = [
-    # path('me/', MyPostsView.as_view(), name='my-posts'),
     path("api/", include(router.urls)),
     path("create/", CreatePostView.as_view(), name="create_post"),
     path("own/", RetrieveOwnPostsView.as_view(), name="own_posts"),
@@ -27,9 +28,13 @@ urlpatterns = [
     path("<int:pk>/like/", LikePostView.as_view(), name="like-post"),
     path("user/liked_posts/", LikedPostsView.as_view(), name="post-details-like-post"),
     path("<int:pk>/", PostDetailView.as_view(), name="post-detail"),
-    path('comment/<int:pk>', CommentCreateView.as_view(), name='comment-create'),
-    path('<int:pk>/comment/', CommentListView.as_view(), name='all-comments-to-the-post'),
-    path('comment/<int:pk>/update/', CommentDetailView.as_view(), name='comment-detail'),
+    path("comment/<int:pk>", CommentCreateView.as_view(), name="comment-create"),
+    path(
+        "<int:pk>/comment/", CommentListView.as_view(), name="all-comments-to-the-post"
+    ),
+    path(
+        "comment/<int:pk>/update/", CommentDetailView.as_view(), name="comment-detail"
+    ),
 ]
 
 app_name = "sonet"

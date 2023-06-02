@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from user.serializers import UserSerializer
 from sonet.models import Post, Hashtag, Like, Comment
 
 
@@ -18,9 +17,7 @@ class CommentSerializer(serializers.ModelSerializer):
         post_id = self.context["view"].kwargs["pk"]
         post = Post.objects.get(pk=post_id)
         comment = Comment.objects.create(
-            user=request.user,
-            post=post,
-            content=validated_data["content"]
+            user=request.user, post=post, content=validated_data["content"]
         )
         return comment
 
@@ -49,7 +46,8 @@ class PostSerializer(serializers.ModelSerializer):
             "comments",
         ]
         read_only_fields = (
-            "id", "created_at", "updated_at", "likes_count", "comments"
+            "id", "created_at",
+            "updated_at", "likes_count", "comments"
         )
 
     def get_hashtag(self, obj):
@@ -58,7 +56,8 @@ class PostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         hashtag_data = validated_data.pop("hashtag", "")
         hashtag_names = [
-            name.strip() for name in hashtag_data.split(",") if name.strip()
+            name.strip() for name in hashtag_data.split(",")
+            if name.strip()
         ]
         post = super().create(validated_data)
 

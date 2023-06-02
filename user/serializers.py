@@ -60,9 +60,15 @@ class UserLogoutSerializer(serializers.Serializer):
 
 
 class FollowingSerializer(serializers.ModelSerializer):
+    following = serializers.SerializerMethodField()
+
+    def get_following(self, obj):
+        user = self.context['request'].user
+        return user.following.filter(pk=obj.pk).exists()
+
     class Meta:
         model = User
-        fields = ["username"]
+        fields = ['username', 'profile_picture', 'bio', 'following']
 
 
 class FollowerSerializer(serializers.ModelSerializer):

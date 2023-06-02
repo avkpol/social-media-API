@@ -1,4 +1,3 @@
-
 from django.contrib.auth.models import (
     AbstractUser,
     BaseUserManager,
@@ -29,7 +28,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
-        """Create and save a SuperUser with the given email and password."""
+
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -52,33 +51,33 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
 
     following = models.ManyToManyField(
-        "self", symmetrical=False, related_name="followers", blank=True
+        "self", symmetrical=False, related_name="followers_set", blank=True
+    )
+    followers = models.ManyToManyField(
+        "self", symmetrical=False, related_name="following_set", blank=True
     )
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
 
-    objects = UserManager()
+USERNAME_FIELD = "email"
+REQUIRED_FIELDS = ["username"]
+
+objects = UserManager()
+
 
 
 class Follower(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="user_followers"  # Unique related_name for the user field
+        related_name="user_followers",
     )
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="following_follower",  # Unique related_name for the following field
+        related_name="user_following",
         verbose_name="follower",
-        null=True
+        null=True,
     )
 
     def __str__(self):
         return f"{self.user.username} is followed by {self.following.username}"
-
-
-
-
-
