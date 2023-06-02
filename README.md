@@ -54,7 +54,6 @@ handling authentication and permissions, working with models, serializers, views
 and following best practices for API design and documentation.
 
 ### HOW TO RUN Tutorial
-
 - Create venv: `python -m venv venv`
 - Activate venv: `sourse venv/bin/activate`
 - Install requirements: `pip install -r requirements.txt`
