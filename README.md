@@ -48,9 +48,21 @@ Use appropriate URL routing for different API endpoints.
 Use appropriate permissions and authentication classes to implement API permissions.
 Follow best practices for RESTful API design and documentation.
 Note: You are not required to implement a frontend interface for this task.
-Focus on building a well-structured and well-documented RESTful API using Django and Django REST framework. 
+Focus on building a well-structured and well-documented RESTfrnebul API using Django and Django REST framework. 
 This task will test the junior DRF developer's skills in building RESTful APIs, 
 handling authentication and permissions, working with models, serializers, views, and viewsets, 
 and following best practices for API design and documentation.
 
+### HOW TO RUN Tutorial
+- Create venv: `python -m venv venv`
+- Activate venv: `sourse venv/bin/activate`
+- Install requirements: `pip install -r requirements.txt`
+- Run migrations: `python manage.py makemigrations`
+                  `python manage.py migrate`
+- Run Redis Server: `docker run -d -p 6379:6379 redis`
+- Run Celery worker for task handling: `celery -A social_media_api beat -l INFO`
+- RUn Celery beat for task scheduling: `celery -A social_media_api beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+`
+- Create schedule for running sync in DB
+- Run the app: `python manage.py runserver`
 
