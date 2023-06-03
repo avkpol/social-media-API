@@ -2,18 +2,15 @@ from django.http import HttpRequest
 
 from rest_framework import viewsets, status, generics, filters
 from rest_framework.decorators import action, api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 
 from user.models import Follower
-from sonet.models import Post, Comment
-from sonet.serializers import (
-    PostSerializer,
-    CommentSerializer,
-    LikeSerializer
-)
+from sonet.models import Post, Comment, Like
+from sonet.serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 from user.urls import user_endpoints
 from user.views import User, IsOwnerOrReadOnly
@@ -89,49 +86,30 @@ class PostViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
-        data["likes_count"] = instance.likes.count()
+        # data["likes_count"] = instance.likes.count()
         return Response(data)
 
     @action(detail=False, methods=["get"])
     def followed(self, request):
-        user = request.user
-        followed_users = (
-            Follower.objects.filter(user=user).values_list(
-                "followed_user", flat=True
-            )
-        )
-        posts = self.queryset.filter(user__in=followed_users)
+        followed_users = request.user.following.all()
+        posts = Post.objects.filter(user__in=followed_users)
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
     def liked_posts(self, request):
-        user = request.user
-        liked_posts = Post.objects.filter(likes=user)
+        liked_posts = Post.objects.filter(likes=request.user)
         serializer = self.get_serializer(liked_posts, many=True)
         return Response(serializer.data)
 
-
-class RetrieveOwnPostsView(APIView):
-    def get(self, request):
-        posts = Post.objects.filter(user=request.user)
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
-
-
-class RetrieveFollowingPostsView(APIView):
-    def get(self, request):
-        following_users = request.user.following.all()
-        posts = Post.objects.filter(user__in=following_users)
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
-
-
-class RetrievePostsByHashtagView(APIView):
-    def get(self, request):
+    def list(self, request, *args, **kwargs):
         hashtag = request.query_params.get("hashtag")
-        posts = Post.objects.filter(hashtag__name=hashtag)
-        serializer = PostSerializer(posts, many=True)
+        if hashtag:
+            posts = Post.objects.filter(hashtag__name=hashtag)
+        else:
+            posts = self.get_queryset()
+
+        serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
 
@@ -139,14 +117,10 @@ class LikeMixin:
     def toggle_like(self, post, user):
         if post.likes.filter(pk=user.pk).exists():
             post.likes.remove(user)
-            return Response(
-                {"status": "unliked"}, status=status.HTTP_200_OK
-            )
+            return Response({"status": "unliked"}, status=status.HTTP_200_OK)
         else:
             post.likes.add(user)
-            return Response(
-                {"status": "liked"}, status=status.HTTP_200_OK
-            )
+            return Response({"status": "liked"}, status=status.HTTP_200_OK)
 
 
 class LikePostView(LikeMixin, APIView):
@@ -154,9 +128,18 @@ class LikePostView(LikeMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
-        return self.toggle_like(post, user)
+        if post.likes.filter(user=user).exists():
+            return Response(
+                {"detail": "You have already liked this post."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        like = Like.objects.create(post=post, user=user)
+        return Response(
+            {"detail": "Post liked successfully.", "like": True},
+            status=status.HTTP_200_OK,
+        )
 
 
 class PostSearchView(generics.ListAPIView):
@@ -181,7 +164,6 @@ class FollowingPostListView(generics.ListAPIView):
         queryset = Post.objects.filter(author__in=following_users)
 
         return queryset
-
 
     def post(self, request, *args, **kwargs):
         post_id = kwargs["pk"]
