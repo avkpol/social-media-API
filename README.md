@@ -48,7 +48,7 @@ Use appropriate URL routing for different API endpoints.
 Use appropriate permissions and authentication classes to implement API permissions.
 Follow best practices for RESTful API design and documentation.
 Note: You are not required to implement a frontend interface for this task.
-Focus on building a well-structured and well-documented RESTful API using Django and Django REST framework. 
+Focus on building a well-structured and well-documented RESTfrnebul API using Django and Django REST framework. 
 This task will test the junior DRF developer's skills in building RESTful APIs, 
 handling authentication and permissions, working with models, serializers, views, and viewsets, 
 and following best practices for API design and documentation.

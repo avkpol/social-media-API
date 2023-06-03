@@ -64,7 +64,6 @@ REQUIRED_FIELDS = ["username"]
 objects = UserManager()
 
 
-
 class Follower(models.Model):
     user = models.ForeignKey(
         User,

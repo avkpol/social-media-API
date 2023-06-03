@@ -24,7 +24,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source="user.username")
-    like = serializers.BooleanField(write_only=True, default=False)
     likes_count = serializers.SerializerMethodField()
     media = serializers.FileField(required=False)
     comments = CommentSerializer(many=True, read_only=True)
@@ -41,23 +40,18 @@ class PostSerializer(serializers.ModelSerializer):
             "user",
             "created_at",
             "updated_at",
-            "like",
             "likes_count",
             "comments",
         ]
-        read_only_fields = (
-            "id", "created_at",
-            "updated_at", "likes_count", "comments"
-        )
+        read_only_fields = ("id", "created_at", "updated_at", "likes_count", "comments")
 
     def get_hashtag(self, obj):
-        return [hashtag.name for hashtag in obj.hashtag.all()]
+        return list(obj.hashtag.all().values_list("name", flat=True))
 
     def create(self, validated_data):
         hashtag_data = validated_data.pop("hashtag", "")
         hashtag_names = [
-            name.strip() for name in hashtag_data.split(",")
-            if name.strip()
+            name.strip() for name in hashtag_data.split(",") if name.strip()
         ]
         post = super().create(validated_data)
 
