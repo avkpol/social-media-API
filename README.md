@@ -67,3 +67,4 @@ and following best practices for API design and documentation.
 - Create schedule for running sync in DB
 - Run the app: `python manage.py runserver`
 
+
